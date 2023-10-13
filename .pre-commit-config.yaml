@@ -35,7 +35,7 @@ repos:
     rev: 1.7.5
     hooks:
     - id: bandit
-      args: ["-c", "bandit.yaml"]
+      args: ["-r", "src"]
   - repo: https://github.com/pycqa/pydocstyle
     rev: 6.3.0
     hooks:
@@ -48,3 +48,4 @@ repos:
     rev: v2.3
     hooks:
     - id: vulture
+      args: ["--min-confidence=90", "src", "tests"]

@@ -1,0 +1,3 @@
+fortune ~= 1.1
+ops ~= 2.4
+requests ~= 2.31

@@ -1,0 +1,12 @@
+name: testing-actions
+display-name: Action-Test
+summary: Provides example actions and tests to exercise them
+description: |
+  A charm with simple actions that do nothing other than demonstrate action functionality
+
+  More importantly, a set of unit tests that exercise the actions that the charm
+  provides, to demonstrate and evaluate the best way for charmers to test the actions
+  of their charms.
+
+  This charm is intended for demonstration purposes and to expand the information in the
+  OP-041 Testing Actions with Harness spec only.

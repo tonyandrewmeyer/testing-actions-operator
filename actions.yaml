@@ -1,0 +1,39 @@
+simple:
+  description: A simple action that has no input or output or logs and does not fail.
+
+input:
+  description: A simple action that takes an input argument.
+  params:
+    arg:
+      description: Input to provide to the action.
+      type: string
+      default: Hello world!
+
+multi-input:
+  description: A simple action that takes multiple types of input.
+  params:
+    arg1:
+      description: Input to provide to the action.
+      type: string
+      default: Hello world!
+    arg2:
+      description: Input to provide to the action.
+      type: integer
+      default: 1
+
+output:
+  description: A simple action that responds with output.
+
+logger:
+  description: A simple action that logs some status while executing.
+
+bad:
+  description: An action that always fails.
+
+combo:
+  description: An action that takes input, logs activity, and will respond with output or fail.
+  params:
+    should-fail:
+      description: Set to true to have the action fail.
+      type: boolean
+      default: false
