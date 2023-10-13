@@ -28,3 +28,30 @@ def test_simple(harness, monkeypatch):
     monkeypatch.setenv("JUJU_ACTION_NAME", "simple")
     monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
     harness.charm.on.simple_action.emit()
+
+
+def test_input_default_value(harness, monkeypatch, caplog):
+    """Verify that the 'input' action runs correctly (no arg is provided)."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "input")
+    monkeypatch.setattr(
+        harness.charm.framework.model._backend,
+        "action_get",
+        lambda: harness.charm.meta.actions["input"].parameters,
+    )
+    harness.charm.on.input_action.emit()
+    default_value = harness.charm.meta.actions["input"].parameters["arg"]
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[0].msg == f"The 'input' action says: {default_value}"
+
+
+def test_input(harness, monkeypatch, caplog):
+    """Verify that the 'input' action runs correctly (an arg is provided)."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "input")
+    response = "hello"
+    params = {"arg": response}
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
+    harness.charm.on.input_action.emit()
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[0].msg == f"The 'input' action says: {response}"
