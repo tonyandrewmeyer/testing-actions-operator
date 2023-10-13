@@ -208,3 +208,13 @@ def test_logger(monkeypatch):
         "I'm counting to 10: 10",
     ]
     assert out.failure == ""
+
+
+def test_bad():
+    """Verify that the 'bad' action runs without error (but fails)."""
+    action = scenario.Action("bad")
+    ctx = scenario.Context(ActionsTestingCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results is None
+    assert out.logs == []
+    assert out.failure

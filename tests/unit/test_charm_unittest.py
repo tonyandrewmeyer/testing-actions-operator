@@ -168,3 +168,13 @@ class TestCharm(unittest.TestCase):
                             unittest.mock.call("I'm counting to 10: 10"),
                         ]
                     )
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "bad"})
+    def test_bad(self):
+        """Verify that the 'bad' action runs without error (but fails)."""
+        with unittest.mock.patch.object(self.harness.charm.framework.model._backend, "action_get"):
+            with unittest.mock.patch.object(
+                self.harness.charm.framework.model._backend, "action_fail"
+            ) as mock_fail:
+                self.harness.charm.on.bad_action.emit()
+                mock_fail.assert_called_once()

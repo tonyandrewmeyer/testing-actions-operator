@@ -162,3 +162,18 @@ def test_logger(harness, monkeypatch):
         "I'm counting to 10: 9",
         "I'm counting to 10: 10",
     ]
+
+
+def test_bad(harness, monkeypatch):
+    """Verify that the 'bad' action runs without error (but fails)."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "bad")
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
+    called = False
+
+    def action_fail(msg):
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_fail", action_fail)
+    harness.charm.on.bad_action.emit()
+    assert called
