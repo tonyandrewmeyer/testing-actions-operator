@@ -71,7 +71,7 @@ class TestingActionsCharm(ops.CharmBase):
         """Do nothing, but talk to the user while we do it."""
         end = 10
         for i in range(end):
-            event.log(f"I'm counting to {end}: {i}")
+            event.log(f"I'm counting to {end}: {i + 1}")
             time.sleep(1)
 
     def _on_bad_action(self, event: ops.ActionEvent):
