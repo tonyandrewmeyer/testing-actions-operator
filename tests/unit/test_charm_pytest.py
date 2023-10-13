@@ -3,6 +3,8 @@
 #
 # Learn more about testing at: https://juju.is/docs/sdk/testing
 
+"""Test the charm using Harness with pytest."""
+
 import ops
 import ops.testing
 import pytest

@@ -3,6 +3,8 @@
 #
 # Learn more about testing at: https://juju.is/docs/sdk/testing
 
+"""Test the charm using Harness with unittest."""
+
 import os
 import unittest
 import unittest.mock
