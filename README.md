@@ -24,4 +24,4 @@ The follow actions are available:
 
 ## Other resources
 
-- [OP-041 - Testing Actions with Harness](https://docs.google.com/document/d/1nxyiR7H7ZJZUIOfyIrEudmTg64jDJvPnPLCAeD1R7w0)
+- [OP-041 - Testing Actions with Harness](https://docs.google.com/document/d/1nxyiR7H7ZJZUIOfyIrEudmTg64jDJvPnPLCAeD1R7w0) (Canonical viewers only)

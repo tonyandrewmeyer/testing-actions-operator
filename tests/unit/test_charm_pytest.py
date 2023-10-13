@@ -19,3 +19,10 @@ def harness():
     harness.begin()
     yield harness
     harness.cleanup()
+
+
+def test_simple(harness, monkeypatch):
+    """Verify that the 'simple' action runs without error."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "simple")
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
+    harness.charm.on.simple_action.emit()
