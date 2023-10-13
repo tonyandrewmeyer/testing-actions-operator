@@ -5,6 +5,7 @@
 
 """Test the charm using the Scenario framework."""
 
+import fortune
 import ops
 import pytest
 import scenario
@@ -169,3 +170,15 @@ def test_multi_input_arg1_and_arg2(caplog):
         assert record.levelname == "INFO"
         assert record.msg == f"The 'multi-input' action says: {params['arg1']}"
     assert count == expected_count
+
+
+def test_output(monkeypatch):
+    """Verify that the 'output' action runs correctly."""
+    my_fortune = "favours the brave"
+    monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortune)
+    action = scenario.Action("output")
+    ctx = scenario.Context(TestingActionsCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results == {"fortune": my_fortune}
+    assert out.logs == []
+    assert out.failure == ""

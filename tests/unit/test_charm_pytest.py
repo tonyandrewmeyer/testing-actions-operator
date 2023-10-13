@@ -5,6 +5,7 @@
 
 """Test the charm using Harness with pytest."""
 
+import fortune
 import ops
 import ops.testing
 import pytest
@@ -116,3 +117,19 @@ def test_multi_input_arg1_and_arg2(harness, monkeypatch, caplog):
     for record in caplog.records:
         assert record.levelname == "INFO"
         assert record.msg == f"The 'multi-input' action says: {response}"
+
+
+def test_output(harness, monkeypatch):
+    """Verify that the 'output' action runs correctly."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "output")
+    my_fortune = "favours the brave"
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
+    monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortune)
+    collected_results = []
+
+    def action_set(results):
+        collected_results.append(results)
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_set", action_set)
+    harness.charm.on.output_action.emit()
+    assert collected_results == [{"fortune": my_fortune}]

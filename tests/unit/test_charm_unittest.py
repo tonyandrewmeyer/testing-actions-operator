@@ -9,6 +9,7 @@ import os
 import unittest
 import unittest.mock
 
+import fortune
 import ops
 import ops.testing
 from charm import TestingActionsCharm
@@ -127,3 +128,17 @@ class TestCharm(unittest.TestCase):
         self.assertEqual(
             cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"] * count
         )
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "output"})
+    def test_output(self):
+        """Verify that the 'output' action runs correctly."""
+        my_fortune = "favours the brave"
+        with unittest.mock.patch.object(self.harness.charm.framework.model._backend, "action_get"):
+            with unittest.mock.patch.object(
+                fortune, "get_random_fortune", return_value=my_fortune
+            ):
+                with unittest.mock.patch.object(
+                    self.harness.charm.framework.model._backend, "action_set"
+                ) as mock_set:
+                    self.harness.charm.on.output_action.emit()
+                    mock_set.assert_called_once_with({"fortune": my_fortune})
