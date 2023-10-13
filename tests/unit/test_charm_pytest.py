@@ -5,6 +5,8 @@
 
 """Test the charm using Harness with pytest."""
 
+import time
+
 import fortune
 import ops
 import ops.testing
@@ -133,3 +135,30 @@ def test_output(harness, monkeypatch):
     monkeypatch.setattr(harness.charm.framework.model._backend, "action_set", action_set)
     harness.charm.on.output_action.emit()
     assert collected_results == [{"fortune": my_fortune}]
+
+
+def test_logger(harness, monkeypatch):
+    """Verify that the 'simple' action runs without error."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "logger")
+    collected_msgs = []
+
+    def action_log(msg):
+        collected_msgs.append(msg)
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_log", action_log)
+    # Also make this a bit faster :)
+    monkeypatch.setattr(time, "sleep", lambda _: None)
+    harness.charm.on.logger_action.emit()
+    assert collected_msgs == [
+        "I'm counting to 10: 1",
+        "I'm counting to 10: 2",
+        "I'm counting to 10: 3",
+        "I'm counting to 10: 4",
+        "I'm counting to 10: 5",
+        "I'm counting to 10: 6",
+        "I'm counting to 10: 7",
+        "I'm counting to 10: 8",
+        "I'm counting to 10: 9",
+        "I'm counting to 10: 10",
+    ]

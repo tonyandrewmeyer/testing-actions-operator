@@ -5,6 +5,8 @@
 
 """Test the charm using the Scenario framework."""
 
+import time
+
 import fortune
 import ops
 import pytest
@@ -181,4 +183,28 @@ def test_output(monkeypatch):
     out = ctx.run_action(action, scenario.State())
     assert out.results == {"fortune": my_fortune}
     assert out.logs == []
+    assert out.failure == ""
+
+
+def test_logger(monkeypatch):
+    """Verify that the 'simple' action runs without error."""
+    # Also make this a bit faster :)
+    monkeypatch.setattr(time, "sleep", lambda _: None)
+
+    action = scenario.Action("logger")
+    ctx = scenario.Context(ActionsTestingCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results is None
+    assert out.logs == [
+        "I'm counting to 10: 1",
+        "I'm counting to 10: 2",
+        "I'm counting to 10: 3",
+        "I'm counting to 10: 4",
+        "I'm counting to 10: 5",
+        "I'm counting to 10: 6",
+        "I'm counting to 10: 7",
+        "I'm counting to 10: 8",
+        "I'm counting to 10: 9",
+        "I'm counting to 10: 10",
+    ]
     assert out.failure == ""

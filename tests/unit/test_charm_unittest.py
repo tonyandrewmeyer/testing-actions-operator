@@ -6,6 +6,7 @@
 """Test the charm using Harness with unittest."""
 
 import os
+import time
 import unittest
 import unittest.mock
 
@@ -142,3 +143,28 @@ class TestCharm(unittest.TestCase):
                 ) as mock_set:
                     self.harness.charm.on.output_action.emit()
                     mock_set.assert_called_once_with({"fortune": my_fortune})
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "logger"})
+    def test_logger(self):
+        """Verify that the 'simple' action runs without error."""
+        with unittest.mock.patch.object(self.harness.charm.framework.model._backend, "action_get"):
+            with unittest.mock.patch.object(
+                self.harness.charm.framework.model._backend, "action_log"
+            ) as mock_log:
+                # Also make this a bit faster :)
+                with unittest.mock.patch.object(time, "sleep"):
+                    self.harness.charm.on.logger_action.emit()
+                    mock_log.assert_has_calls(
+                        [
+                            unittest.mock.call("I'm counting to 10: 1"),
+                            unittest.mock.call("I'm counting to 10: 2"),
+                            unittest.mock.call("I'm counting to 10: 3"),
+                            unittest.mock.call("I'm counting to 10: 4"),
+                            unittest.mock.call("I'm counting to 10: 5"),
+                            unittest.mock.call("I'm counting to 10: 6"),
+                            unittest.mock.call("I'm counting to 10: 7"),
+                            unittest.mock.call("I'm counting to 10: 8"),
+                            unittest.mock.call("I'm counting to 10: 9"),
+                            unittest.mock.call("I'm counting to 10: 10"),
+                        ]
+                    )
