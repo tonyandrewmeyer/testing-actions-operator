@@ -9,7 +9,7 @@ import fortune
 import ops
 import ops.testing
 import pytest
-from charm import TestingActionsCharm
+from charm import ActionsTestingCharm
 
 
 @pytest.fixture()
@@ -18,7 +18,7 @@ def harness():
 
     ``begin()`` has already been called for you.
     """
-    harness = ops.testing.Harness(TestingActionsCharm)
+    harness = ops.testing.Harness(ActionsTestingCharm)
     harness.begin()
     yield harness
     harness.cleanup()

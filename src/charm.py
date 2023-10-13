@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 FORTUNE_SOURCE = "https://raw.githubusercontent.com/bmc/fortunes/master/fortunes"
 
 
-class TestingActionsCharm(ops.CharmBase):
+class ActionsTestingCharm(ops.CharmBase):
     """Charm the service."""
 
     def __init__(self, framework: ops.Framework):
@@ -90,4 +90,4 @@ class TestingActionsCharm(ops.CharmBase):
 
 
 if __name__ == "__main__":  # pragma: nocover
-    ops.main(TestingActionsCharm)  # type: ignore
+    ops.main(ActionsTestingCharm)  # type: ignore

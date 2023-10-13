@@ -12,12 +12,12 @@ import unittest.mock
 import fortune
 import ops
 import ops.testing
-from charm import TestingActionsCharm
+from charm import ActionsTestingCharm
 
 
 class TestCharm(unittest.TestCase):
     def setUp(self):
-        self.harness = ops.testing.Harness(TestingActionsCharm)
+        self.harness = ops.testing.Harness(ActionsTestingCharm)
         self.addCleanup(self.harness.cleanup)
         self.harness.begin()
 

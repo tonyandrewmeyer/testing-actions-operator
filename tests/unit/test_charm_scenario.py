@@ -9,7 +9,7 @@ import fortune
 import ops
 import pytest
 import scenario
-from charm import TestingActionsCharm
+from charm import ActionsTestingCharm
 
 
 @pytest.fixture()
@@ -23,7 +23,7 @@ def charm_meta():
 def test_simple():
     """Verify that the 'simple' action runs without error."""
     action = scenario.Action("simple")
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -38,7 +38,7 @@ def test_input_default_value(caplog, charm_meta):
         key: details["default"] for key, details in charm_meta.actions["input"].parameters.items()
     }
     action = scenario.Action("input", params=default_value)
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -58,7 +58,7 @@ def test_input(caplog):
     """Verify that the 'input' action runs correctly (an arg is provided)."""
     response = "hello"
     action = scenario.Action("input", params={"arg": response})
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -81,7 +81,7 @@ def test_multi_input_default_value(caplog, charm_meta):
         for key, details in charm_meta.actions["multi-input"].parameters.items()
     }
     action = scenario.Action("multi-input", params=default_value)
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -106,7 +106,7 @@ def test_multi_input_arg1(caplog, charm_meta):
     response = "hello"
     default_value["arg1"] = response
     action = scenario.Action("multi-input", params=default_value)
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -131,7 +131,7 @@ def test_multi_input_arg2(caplog, charm_meta):
     expected_count = 2
     default_value["arg2"] = expected_count
     action = scenario.Action("multi-input", params=default_value)
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -156,7 +156,7 @@ def test_multi_input_arg1_and_arg2(caplog):
         "arg2": expected_count,
     }
     action = scenario.Action("multi-input", params=params)
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results is None
     assert out.logs == []
@@ -177,7 +177,7 @@ def test_output(monkeypatch):
     my_fortune = "favours the brave"
     monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortune)
     action = scenario.Action("output")
-    ctx = scenario.Context(TestingActionsCharm)
+    ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
     assert out.results == {"fortune": my_fortune}
     assert out.logs == []
