@@ -23,17 +23,21 @@ class TestCharm(unittest.TestCase):
     @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "simple"})
     def test_simple(self):
         """Verify that the 'simple' action runs without error."""
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock()
-        self.harness.charm.on.simple_action.emit()
+        with unittest.mock.patch.object(self.harness.charm.framework.model._backend, "action_get"):
+            self.harness.charm.on.simple_action.emit()
 
     @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "input"})
     def test_input_default_value(self):
         """Verify that the 'input' action runs correctly (no arg is provided)."""
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
-            return_value=self.harness.charm.meta.actions["input"].parameters
-        )
-        with self.assertLogs(level="INFO") as cm:
-            self.harness.charm.on.input_action.emit()
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(
+                return_value=self.harness.charm.meta.actions["input"].parameters
+            ),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.input_action.emit()
         default_value = self.harness.charm.meta.actions["input"].parameters["arg"]
         self.assertEqual(cm.output, [f"INFO:charm:The 'input' action says: {default_value}"])
 
@@ -42,11 +46,13 @@ class TestCharm(unittest.TestCase):
         """Verify that the 'input' action runs correctly (an arg is provided)."""
         response = "hello"
         params = {"arg": response}
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
-            return_value=params
-        )
-        with self.assertLogs(level="INFO") as cm:
-            self.harness.charm.on.input_action.emit()
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(return_value=params),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.input_action.emit()
         self.assertEqual(cm.output, [f"INFO:charm:The 'input' action says: {response}"])
 
     @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
@@ -56,11 +62,13 @@ class TestCharm(unittest.TestCase):
             key: details["default"]
             for key, details in self.harness.charm.meta.actions["multi-input"].parameters.items()
         }
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
-            return_value=params
-        )
-        with self.assertLogs(level="INFO") as cm:
-            self.harness.charm.on.multi_input_action.emit()
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(return_value=params),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.multi_input_action.emit()
         self.assertEqual(
             cm.output, [f"INFO:charm:The 'multi-input' action says: {params['arg1']}"]
         )
@@ -74,11 +82,13 @@ class TestCharm(unittest.TestCase):
         }
         response = "hello"
         params["arg1"] = response
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
-            return_value=params
-        )
-        with self.assertLogs(level="INFO") as cm:
-            self.harness.charm.on.multi_input_action.emit()
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(return_value=params),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.multi_input_action.emit()
         self.assertEqual(cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"])
 
     @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
@@ -90,11 +100,13 @@ class TestCharm(unittest.TestCase):
         }
         count = 2
         params["arg2"] = count
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
-            return_value=params
-        )
-        with self.assertLogs(level="INFO") as cm:
-            self.harness.charm.on.multi_input_action.emit()
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(return_value=params),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.multi_input_action.emit()
         self.assertEqual(
             cm.output, [f"INFO:charm:The 'multi-input' action says: {params['arg1']}"] * count
         )
@@ -105,11 +117,13 @@ class TestCharm(unittest.TestCase):
         response = "hello"
         count = 3
         params = {"arg1": response, "arg2": count}
-        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
-            return_value=params
-        )
-        with self.assertLogs(level="INFO") as cm:
-            self.harness.charm.on.multi_input_action.emit()
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(return_value=params),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.multi_input_action.emit()
         self.assertEqual(
             cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"] * count
         )
