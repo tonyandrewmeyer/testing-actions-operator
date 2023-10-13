@@ -178,3 +178,39 @@ class TestCharm(unittest.TestCase):
             ) as mock_fail:
                 self.harness.charm.on.bad_action.emit()
                 mock_fail.assert_called_once()
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "combo"})
+    def test_combo_fail(self):
+        """Verify that the 'combo' action fails when instructed to do so."""
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            return_value={"should-fail": True},
+        ):
+            with unittest.mock.patch.object(
+                self.harness.charm.framework.model._backend, "action_fail"
+            ) as mock_fail:
+                self.harness.charm.on.combo_action.emit()
+                mock_fail.assert_called_once()
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "combo"})
+    def test_combo(self):
+        """Verify that the 'combo' action runs without error."""
+        my_fortunes = ["magazine", "500", "cookie"]
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            return_value={"should-fail": False},
+        ):
+            with unittest.mock.patch.object(
+                self.harness.charm.framework.model._backend, "action_log"
+            ) as mock_log:
+                with unittest.mock.patch.object(
+                    fortune, "get_random_fortune", side_effect=my_fortunes
+                ):
+                    with unittest.mock.patch.object(
+                        self.harness.charm.framework.model._backend, "action_set"
+                    ) as mock_set:
+                        self.harness.charm.on.combo_action.emit()
+                        mock_log.assert_has_calls([unittest.mock.call(f) for f in my_fortunes])
+                        mock_set.assert_called_once_with({"fortunes-told": 3})

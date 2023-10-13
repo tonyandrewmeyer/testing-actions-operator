@@ -177,3 +177,48 @@ def test_bad(harness, monkeypatch):
     monkeypatch.setattr(harness.charm.framework.model._backend, "action_fail", action_fail)
     harness.charm.on.bad_action.emit()
     assert called
+
+
+def test_combo_fail(harness, monkeypatch):
+    """Verify that the 'combo' action fails when instructed to do so."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "combo")
+    monkeypatch.setattr(
+        harness.charm.framework.model._backend,
+        "action_get",
+        lambda: {"should-fail": True},
+    )
+    called = False
+
+    def action_fail(msg):
+        nonlocal called
+        called = True
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_fail", action_fail)
+    harness.charm.on.combo_action.emit()
+    assert called
+
+
+def test_combo(harness, monkeypatch):
+    """Verify that the 'combo' action runs without error."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "combo")
+    my_fortunes = ["magazine", "500", "cookie"]
+    expected_fortunes = my_fortunes[:]
+    monkeypatch.setattr(
+        harness.charm.framework.model._backend, "action_get", lambda: {"should-fail": False}
+    )
+    collected_msgs = []
+
+    def action_log(msg):
+        collected_msgs.append(msg)
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_log", action_log)
+    monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortunes.pop(0))
+    collected_results = []
+
+    def action_set(results):
+        collected_results.append(results)
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_set", action_set)
+    harness.charm.on.combo_action.emit()
+    assert collected_msgs == expected_fortunes
+    assert collected_results == [{"fortunes-told": 3}]

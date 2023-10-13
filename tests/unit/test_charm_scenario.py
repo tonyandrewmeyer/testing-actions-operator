@@ -218,3 +218,27 @@ def test_bad():
     assert out.results is None
     assert out.logs == []
     assert out.failure
+
+
+def test_combo_fail():
+    """Verify that the 'combo' action fails when instructed to do so."""
+    action = scenario.Action("combo", params={"should-fail": True})
+    ctx = scenario.Context(ActionsTestingCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results is None
+    assert out.logs == []
+    assert out.failure
+
+
+def test_combo(monkeypatch):
+    """Verify that the 'combo' action runs without error."""
+    my_fortunes = ["magazine", "500", "cookie"]
+    expected_fortunes = my_fortunes[:]
+    monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortunes.pop(0))
+
+    action = scenario.Action("combo", params={"should-fail": False})
+    ctx = scenario.Context(ActionsTestingCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results == {"fortunes-told": 3}
+    assert out.logs == expected_fortunes
+    assert out.failure == ""
