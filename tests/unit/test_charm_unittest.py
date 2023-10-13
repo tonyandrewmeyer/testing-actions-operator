@@ -48,3 +48,68 @@ class TestCharm(unittest.TestCase):
         with self.assertLogs(level="INFO") as cm:
             self.harness.charm.on.input_action.emit()
         self.assertEqual(cm.output, [f"INFO:charm:The 'input' action says: {response}"])
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
+    def test_multi_input_default_value(self):
+        """Verify that the 'multi-input' action runs correctly (no arg is provided)."""
+        params = {
+            key: details["default"]
+            for key, details in self.harness.charm.meta.actions["multi-input"].parameters.items()
+        }
+        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
+            return_value=params
+        )
+        with self.assertLogs(level="INFO") as cm:
+            self.harness.charm.on.multi_input_action.emit()
+        self.assertEqual(
+            cm.output, [f"INFO:charm:The 'multi-input' action says: {params['arg1']}"]
+        )
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
+    def test_multi_input_arg1(self):
+        """Verify that the 'multi-input' action runs correctly (arg1 is provided)."""
+        params = {
+            key: details["default"]
+            for key, details in self.harness.charm.meta.actions["multi-input"].parameters.items()
+        }
+        response = "hello"
+        params["arg1"] = response
+        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
+            return_value=params
+        )
+        with self.assertLogs(level="INFO") as cm:
+            self.harness.charm.on.multi_input_action.emit()
+        self.assertEqual(cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"])
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
+    def test_multi_input_arg2(self):
+        """Verify that the 'multi-input' action runs correctly (arg2 is provided)."""
+        params = {
+            key: details["default"]
+            for key, details in self.harness.charm.meta.actions["multi-input"].parameters.items()
+        }
+        count = 2
+        params["arg2"] = count
+        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
+            return_value=params
+        )
+        with self.assertLogs(level="INFO") as cm:
+            self.harness.charm.on.multi_input_action.emit()
+        self.assertEqual(
+            cm.output, [f"INFO:charm:The 'multi-input' action says: {params['arg1']}"] * count
+        )
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
+    def test_multi_input_arg1_and_arg2(self):
+        """Verify that the 'multi-input' action runs correctly (arg1 and arg2 are provided)."""
+        response = "hello"
+        count = 3
+        params = {"arg1": response, "arg2": count}
+        self.harness.charm.framework.model._backend.action_get = unittest.mock.MagicMock(
+            return_value=params
+        )
+        with self.assertLogs(level="INFO") as cm:
+            self.harness.charm.on.multi_input_action.emit()
+        self.assertEqual(
+            cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"] * count
+        )
