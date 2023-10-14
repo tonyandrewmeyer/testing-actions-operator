@@ -7,5 +7,5 @@ __pycache__/
 *.py[cod]
 .idea
 .vscode/
-fortunes.txt
+./fortunes.txt
 juju-crashdump-*.tar.xz
