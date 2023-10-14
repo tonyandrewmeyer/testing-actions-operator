@@ -11,16 +11,12 @@ testing those actions should optimally be done.
 """
 
 import logging
-import os
 import time
 
 import fortune
 import ops
-import requests
 
 logger = logging.getLogger(__name__)
-
-FORTUNE_SOURCE = "https://raw.githubusercontent.com/bmc/fortunes/master/fortunes"
 
 
 class ActionsTestingCharm(ops.CharmBase):
@@ -29,9 +25,7 @@ class ActionsTestingCharm(ops.CharmBase):
     def __init__(self, framework: ops.Framework):
         """Set up the charm."""
         super().__init__(framework)
-        self._fortune_file = "fortunes.txt"
-        self.framework.observe(self.on.install, self._prepare_something_to_say)
-        self.framework.observe(self.on.upgrade_charm, self._prepare_something_to_say)
+        self._fortune_file = "src/fortunes.txt"
         self.framework.observe(self.on.simple_action, self._on_simple_action)
         self.framework.observe(self.on.input_action, self._on_input_action)
         self.framework.observe(self.on.multi_input_action, self._on_multi_input_action)
@@ -39,15 +33,7 @@ class ActionsTestingCharm(ops.CharmBase):
         self.framework.observe(self.on.logger_action, self._on_logger_action)
         self.framework.observe(self.on.bad_action, self._on_bad_action)
         self.framework.observe(self.on.combo_action, self._on_combo_action)
-
-    def _prepare_something_to_say(self, event: ops.EventBase):
-        """Get ready to provide something interesting to the user."""
-        # We could also check if the file seems old, but this will suffice for now.
-        if not os.path.exists(self._fortune_file):
-            response = requests.get(FORTUNE_SOURCE, timeout=60)
-            response.raise_for_status()
-            with open(self._fortune_file, "w") as fout:
-                fout.write(response.text)
+        # We don't need to prepare anything, so are always active.
         self.unit.status = ops.ActiveStatus()  # noqa: F841
 
     def _on_simple_action(self, event: ops.ActionEvent):

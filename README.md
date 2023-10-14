@@ -25,3 +25,10 @@ The follow actions are available:
 ## Other resources
 
 - [OP-041 - Testing Actions with Harness](https://docs.google.com/document/d/1nxyiR7H7ZJZUIOfyIrEudmTg64jDJvPnPLCAeD1R7w0) (Canonical viewers only)
+
+## Fortunes source
+
+The charm uses a database of fortunes as a source of messages to provide. The
+fortunes file can be found [on GitHub](https://github.com/bmc/fortunes), and is
+used under a CC Attribution 4.0 license (details can be found in that GitHub
+repository).
