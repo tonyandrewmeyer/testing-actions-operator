@@ -26,95 +26,87 @@ def harness():
     harness.cleanup()
 
 
-def test_simple(harness, monkeypatch):
+def test_simple(harness):
     """Verify that the 'simple' action runs without error."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "simple")
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
-    harness.charm.on.simple_action.emit()
+    out = harness.run_action("simple")
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
 
 
-def test_input_default_value(harness, monkeypatch, caplog):
+def test_input_default_value(harness, caplog):
     """Verify that the 'input' action runs correctly (no arg is provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "input")
-    monkeypatch.setattr(
-        harness.charm.framework.model._backend,
-        "action_get",
-        lambda: harness.charm.meta.actions["input"].parameters,
-    )
-    harness.charm.on.input_action.emit()
-    default_value = harness.charm.meta.actions["input"].parameters["arg"]
+    out = harness.run_action("input")
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
     assert len(caplog.records) == 1
     assert caplog.records[0].levelname == "INFO"
+    default_value = harness.charm.meta.actions["input"].parameters["arg"]
     assert caplog.records[0].msg == f"The 'input' action says: {default_value}"
 
 
-def test_input(harness, monkeypatch, caplog):
+def test_input(harness, caplog):
     """Verify that the 'input' action runs correctly (an arg is provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "input")
     response = "hello"
-    params = {"arg": response}
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
-    harness.charm.on.input_action.emit()
+    out = harness.run_action("input", {"arg": response})
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
     assert len(caplog.records) == 1
     assert caplog.records[0].levelname == "INFO"
     assert caplog.records[0].msg == f"The 'input' action says: {response}"
 
 
-def test_multi_input_default_value(harness, monkeypatch, caplog):
+def test_multi_input_default_value(harness, caplog):
     """Verify that the 'multi-input' action runs correctly (no arg is provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
-    params = {
-        key: details["default"]
-        for key, details in harness.charm.meta.actions["multi-input"].parameters.items()
-    }
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
-    harness.charm.on.multi_input_action.emit()
-    assert len(caplog.records) == 1
-    assert caplog.records[0].levelname == "INFO"
-    assert caplog.records[0].msg == f"The 'multi-input' action says: {params['arg1']}"
+    out = harness.run_action("multi-input")
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
+    defaults = harness.charm.meta.actions["input"].parameters
+    assert len(caplog.records) == defaults["arg2"]["default"]
+    for record in caplog.records:
+        assert record.levelname == "INFO"
+        assert record.msg == f"The 'multi-input' action says: {defaults['arg1']['default']}"
 
 
-def test_multi_input_arg1(harness, monkeypatch, caplog):
+def test_multi_input_arg1(harness, caplog):
     """Verify that the 'multi-input' action runs correctly (arg1 is provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
-    params = {
-        key: details["default"]
-        for key, details in harness.charm.meta.actions["multi-input"].parameters.items()
-    }
     response = "hello"
-    params["arg1"] = response
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
-    harness.charm.on.multi_input_action.emit()
-    assert len(caplog.records) == 1
-    assert caplog.records[0].levelname == "INFO"
-    assert caplog.records[0].msg == f"The 'multi-input' action says: {response}"
+    out = harness.run_action("multi-input", params={"arg1": response})
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
+    defaults = harness.charm.meta.actions["input"].parameters
+    assert len(caplog.records) == defaults["arg2"]["default"]
+    for record in caplog.record:
+        assert record.levelname == "INFO"
+        assert record.msg == f"The 'multi-input' action says: {response}"
 
 
-def test_multi_input_arg2(harness, monkeypatch, caplog):
+def test_multi_input_arg2(harness, caplog):
     """Verify that the 'multi-input' action runs correctly (arg2 is provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
-    params = {
-        key: details["default"]
-        for key, details in harness.charm.meta.actions["multi-input"].parameters.items()
-    }
     count = 2
-    params["arg2"] = count
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
-    harness.charm.on.multi_input_action.emit()
+    out = harness.run_action("multi-input", params={"arg2": count})
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
+    defaults = harness.charm.meta.actions["input"].parameters
     assert len(caplog.records) == count
     for record in caplog.records:
         assert record.levelname == "INFO"
-        assert record.msg == f"The 'multi-input' action says: {params['arg1']}"
+        assert record.msg == f"The 'multi-input' action says: {defaults['arg1']['default']}"
 
 
-def test_multi_input_arg1_and_arg2(harness, monkeypatch, caplog):
+def test_multi_input_arg1_and_arg2(harness, caplog):
     """Verify that the 'multi-input' action runs correctly (arg1 and arg2 are provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
     response = "hello"
     count = 3
-    params = {"arg1": response, "arg2": count}
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
-    harness.charm.on.multi_input_action.emit()
+    out = harness.run_action("multi-input", params={"arg1": response, "arg2": count})
+    assert out.results is None
+    assert out.logs == []
+    assert not out.failure
     assert len(caplog.records) == count
     for record in caplog.records:
         assert record.levelname == "INFO"
@@ -123,34 +115,21 @@ def test_multi_input_arg1_and_arg2(harness, monkeypatch, caplog):
 
 def test_output(harness, monkeypatch):
     """Verify that the 'output' action runs correctly."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "output")
     my_fortune = "favours the brave"
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
     monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortune)
-    collected_results = []
-
-    def action_set(results):
-        collected_results.append(results)
-
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_set", action_set)
-    harness.charm.on.output_action.emit()
-    assert collected_results == [{"fortune": my_fortune}]
+    out = harness.run_action("output")
+    assert out.results == {"fortune": my_fortune}
+    assert out.logs == []
+    assert not out.failure
 
 
 def test_logger(harness, monkeypatch):
     """Verify that the 'simple' action runs without error."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "logger")
-    collected_msgs = []
-
-    def action_log(msg):
-        collected_msgs.append(msg)
-
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_log", action_log)
     # Also make this a bit faster :)
     monkeypatch.setattr(time, "sleep", lambda _: None)
-    harness.charm.on.logger_action.emit()
-    assert collected_msgs == [
+    out = harness.run_action("logger")
+    assert out.results is None
+    assert out.logs == [
         "I'm counting to 10: 1",
         "I'm counting to 10: 2",
         "I'm counting to 10: 3",
@@ -162,63 +141,32 @@ def test_logger(harness, monkeypatch):
         "I'm counting to 10: 9",
         "I'm counting to 10: 10",
     ]
+    assert not out.failure
 
 
-def test_bad(harness, monkeypatch):
+def test_bad(harness):
     """Verify that the 'bad' action runs without error (but fails)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "bad")
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
-    called = False
-
-    def action_fail(msg):
-        nonlocal called
-        called = True
-
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_fail", action_fail)
-    harness.charm.on.bad_action.emit()
-    assert called
+    out = harness.run_action("bad")
+    assert out.results is None
+    assert out.logs == []
+    assert out.failure == "Sorry, I just couldn't manage it."
 
 
 def test_combo_fail(harness, monkeypatch):
     """Verify that the 'combo' action fails when instructed to do so."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "combo")
-    monkeypatch.setattr(
-        harness.charm.framework.model._backend,
-        "action_get",
-        lambda: {"should-fail": True},
-    )
-    called = False
-
-    def action_fail(msg):
-        nonlocal called
-        called = True
-
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_fail", action_fail)
-    harness.charm.on.combo_action.emit()
-    assert called
+    out = harness.run_action("combo", {"should-fail": True})
+    assert out.results is None
+    assert out.logs == []
+    assert out.failure
 
 
 def test_combo(harness, monkeypatch):
     """Verify that the 'combo' action runs without error."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "combo")
     my_fortunes = ["magazine", "500", "cookie"]
     expected_fortunes = my_fortunes[:]
-    monkeypatch.setattr(
-        harness.charm.framework.model._backend, "action_get", lambda: {"should-fail": False}
-    )
-    collected_msgs = []
-
-    def action_log(msg):
-        collected_msgs.append(msg)
-
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_log", action_log)
     monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortunes.pop(0))
-    collected_results = []
 
-    def action_set(results):
-        collected_results.append(results)
-
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_set", action_set)
-    harness.charm.on.combo_action.emit()
-    assert collected_msgs == expected_fortunes
-    assert collected_results == [{"fortunes-told": 3}]
+    out = harness.run_action("combo")
+    assert out.results == {"fortunes-told": 3}
+    assert out.logs == expected_fortunes
+    assert not out.failure
