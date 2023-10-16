@@ -12,14 +12,35 @@ input:
 multi-input:
   description: A simple action that takes multiple types of input.
   params:
-    arg1:
-      description: Input to provide to the action.
+    str-arg:
+      description: String input to provide to the action.
       type: string
       default: Hello world!
-    arg2:
-      description: Input to provide to the action.
+    int-arg:
+      description: Integer input to provide to the action.
       type: integer
       default: 1
+    num-arg:
+      description: Number input to provide to the action
+      type: number
+      default: 0.1
+    bool-arg:
+      description: Boolean input to provide to the action
+      type: boolean
+      default: false
+    array-arg:
+      description: Array input to provide to the action
+      type: array
+      default:
+        - a
+        - b
+        - c
+    obj-arg:
+      description: Object input to provide to the action
+      type: object
+      default:
+        key1: value1
+        key2: value2
 
 output:
   description: A simple action that responds with output.

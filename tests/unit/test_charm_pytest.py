@@ -71,18 +71,18 @@ def test_multi_input_default_value(harness, monkeypatch, caplog):
     harness.charm.on.multi_input_action.emit()
     assert len(caplog.records) == 1
     assert caplog.records[0].levelname == "INFO"
-    assert caplog.records[0].msg == f"The 'multi-input' action says: {params['arg1']}"
+    assert caplog.records[0].msg == f"The 'multi-input' action says: {params['str-arg']}"
 
 
-def test_multi_input_arg1(harness, monkeypatch, caplog):
-    """Verify that the 'multi-input' action runs correctly (arg1 is provided)."""
+def test_multi_input_str_arg(harness, monkeypatch, caplog):
+    """Verify that the 'multi-input' action runs correctly (str-arg is provided)."""
     monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
     params = {
         key: details["default"]
         for key, details in harness.charm.meta.actions["multi-input"].parameters.items()
     }
     response = "hello"
-    params["arg1"] = response
+    params["str-arg"] = response
     monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
     harness.charm.on.multi_input_action.emit()
     assert len(caplog.records) == 1
@@ -90,29 +90,34 @@ def test_multi_input_arg1(harness, monkeypatch, caplog):
     assert caplog.records[0].msg == f"The 'multi-input' action says: {response}"
 
 
-def test_multi_input_arg2(harness, monkeypatch, caplog):
-    """Verify that the 'multi-input' action runs correctly (arg2 is provided)."""
+def test_multi_input_int_arg(harness, monkeypatch, caplog):
+    """Verify that the 'multi-input' action runs correctly (int-arg is provided)."""
     monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
     params = {
         key: details["default"]
         for key, details in harness.charm.meta.actions["multi-input"].parameters.items()
     }
     count = 2
-    params["arg2"] = count
+    params["int-arg"] = count
     monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
     harness.charm.on.multi_input_action.emit()
     assert len(caplog.records) == count
     for record in caplog.records:
         assert record.levelname == "INFO"
-        assert record.msg == f"The 'multi-input' action says: {params['arg1']}"
+        assert record.msg == f"The 'multi-input' action says: {params['str-arg']}"
 
 
-def test_multi_input_arg1_and_arg2(harness, monkeypatch, caplog):
-    """Verify that the 'multi-input' action runs correctly (arg1 and arg2 are provided)."""
+def test_multi_input_str_arg_and_int_arg(harness, monkeypatch, caplog):
+    """Verify that the 'multi-input' action runs correctly (str-arg and int_arg are provided)."""
     monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
+    params = {
+        key: details["default"]
+        for key, details in harness.charm.meta.actions["multi-input"].parameters.items()
+    }
     response = "hello"
     count = 3
-    params = {"arg1": response, "arg2": count}
+    params["str-arg"] = response
+    params["int-arg"] = count
     monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
     harness.charm.on.multi_input_action.emit()
     assert len(caplog.records) == count

@@ -46,8 +46,13 @@ class ActionsTestingCharm(ops.CharmBase):
 
     def _on_multi_input_action(self, event: ops.ActionEvent):
         """Log whatever input we were given, as many times as we are told."""
-        for _ in range(event.params["arg2"]):
-            logger.info(f"The 'multi-input' action says: {event.params['arg1']}")
+        for _ in range(event.params["int-arg"]):
+            logger.info(f"The 'multi-input' action says: {event.params['str-arg']}")
+        if event.params["bool-arg"]:
+            logger.info(
+                f"The 'multi-input' action also says: {event.params['num-arg']}, "
+                f"{event.params['array-arg']}, and {event.params['obj-arg']}"
+            )
 
     def _on_output_action(self, event: ops.ActionEvent):
         """Say something back to the user."""

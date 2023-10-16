@@ -79,7 +79,8 @@ async def test_multi_input(app, ops_test):
     arg = "world"
     count = 2
     for unit in app.units:
-        action = await unit.run_action("multi-input", arg1=arg, arg2=count)
+        kwargs = {"str-arg": arg, "int-arg": count}
+        action = await unit.run_action("multi-input", **kwargs)
         action = await action.wait()
         assert action.status == "completed"
     matches = 0
