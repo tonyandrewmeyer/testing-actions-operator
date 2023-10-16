@@ -18,7 +18,7 @@ multi-input:
       default: Hello world!
     arg2:
       description: Input to provide to the action.
-      type: number
+      type: integer
       default: 1
 
 output:
