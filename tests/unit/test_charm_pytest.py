@@ -124,7 +124,15 @@ def test_output(harness, monkeypatch):
 
 
 def test_logger(harness, monkeypatch):
-    """Verify that the 'simple' action runs without error."""
+    """Verify that the 'logger' action runs without error."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "logger")
+    collected_msgs = []
+
+    def action_log(msg):
+        collected_msgs.append(msg)
+
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: None)
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_log", action_log)
     # Also make this a bit faster :)
     monkeypatch.setattr(time, "sleep", lambda _: None)
     out = harness.run_action("logger")

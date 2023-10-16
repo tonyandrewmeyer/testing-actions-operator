@@ -187,7 +187,7 @@ def test_output(monkeypatch):
 
 
 def test_logger(monkeypatch):
-    """Verify that the 'simple' action runs without error."""
+    """Verify that the 'logger' action runs without error."""
     # Also make this a bit faster :)
     monkeypatch.setattr(time, "sleep", lambda _: None)
 

@@ -107,7 +107,7 @@ class TestCharm(unittest.TestCase):
         assert not out.failure
 
     def test_logger(self):
-        """Verify that the 'simple' action runs without error."""
+        """Verify that the 'logger' action runs without error."""
         # Also make this a bit faster :)
         with unittest.mock.patch.object(time, "sleep"):
             out = self.harness.run_action("logger")
