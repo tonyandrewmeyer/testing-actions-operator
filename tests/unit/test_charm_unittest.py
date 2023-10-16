@@ -146,7 +146,7 @@ class TestCharm(unittest.TestCase):
 
     @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "logger"})
     def test_logger(self):
-        """Verify that the 'simple' action runs without error."""
+        """Verify that the 'logger' action runs without error."""
         with unittest.mock.patch.object(self.harness.charm.framework.model._backend, "action_get"):
             with unittest.mock.patch.object(
                 self.harness.charm.framework.model._backend, "action_log"

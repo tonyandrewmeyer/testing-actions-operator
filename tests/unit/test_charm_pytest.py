@@ -138,7 +138,7 @@ def test_output(harness, monkeypatch):
 
 
 def test_logger(harness, monkeypatch):
-    """Verify that the 'simple' action runs without error."""
+    """Verify that the 'logger' action runs without error."""
     monkeypatch.setenv("JUJU_ACTION_NAME", "logger")
     collected_msgs = []
 
