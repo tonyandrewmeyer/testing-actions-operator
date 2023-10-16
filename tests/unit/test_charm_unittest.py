@@ -26,7 +26,6 @@ class TestCharm(unittest.TestCase):
         out = self.harness.run_action("simple")
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
 
     def test_input_default_value(self):
         """Verify that the 'input' action runs correctly (no arg is provided)."""
@@ -34,7 +33,6 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("input")
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
         default_value = self.harness.charm.meta.actions["input"].parameters["arg"]
         self.assertEqual(cm.output, [f"INFO:charm:The 'input' action says: {default_value}"])
 
@@ -45,7 +43,6 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("input", {"arg": response})
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
         self.assertEqual(cm.output, [f"INFO:charm:The 'input' action says: {response}"])
 
     def test_multi_input_default_value(self):
@@ -54,10 +51,10 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("multi-input")
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
         defaults = self.harness.charm.meta.actions["input"].parameters
         self.assertEqual(
-            cm.output, [f"INFO:charm:The 'multi-input' action says: {defaults['str-arg']['default']}"]
+            cm.output,
+            [f"INFO:charm:The 'multi-input' action says: {defaults['str-arg']['default']}"],
         )
 
     def test_multi_input_str_arg(self):
@@ -67,7 +64,6 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("multi-input", params={"str-arg": response})
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
         self.assertEqual(cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"])
 
     def test_multi_input_int_arg(self):
@@ -77,11 +73,11 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("multi-input", params={"int_arg": count})
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
         defaults = self.harness.charm.meta.actions["input"].parameters
         self.assertEqual(
             cm.output,
-            [f"INFO:charm:The 'multi-input' action says: {defaults['str-arg']['default']}"] * count,
+            [f"INFO:charm:The 'multi-input' action says: {defaults['str-arg']['default']}"]
+            * count,
         )
 
     def test_multi_input_str_arg_and_int_arg(self):
@@ -89,15 +85,15 @@ class TestCharm(unittest.TestCase):
         response = "hello"
         count = 3
         with self.assertLogs(level="INFO") as cm:
-            out = self.harness.run_action("multi-input", params={"str-arg": response, "int-arg": count})
+            out = self.harness.run_action(
+                "multi-input", params={"str-arg": response, "int-arg": count}
+            )
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
         self.assertEqual(
             cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"] * count
         )
 
-    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
     def test_multi_input_all_args(self):
         """Verify that the 'multi-input' action runs correctly (all args are provided)."""
         response = "hello"
@@ -122,7 +118,6 @@ class TestCharm(unittest.TestCase):
         )
         self.assertEqual(cm.output, expected_output)
 
-    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "output"})
     def test_output(self):
         """Verify that the 'output' action runs correctly."""
         my_fortune = "favours the brave"
@@ -130,7 +125,6 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("output")
         self.assertEqual(out.results, {"fortune": my_fortune})
         self.assertEqual(out.logs, [])
-        self.assertTrue(out.success)
 
     def test_logger(self):
         """Verify that the 'logger' action runs without error."""
@@ -153,22 +147,20 @@ class TestCharm(unittest.TestCase):
                 "I'm counting to 10: 10",
             ],
         )
-        self.assertTrue(out.success)
 
     def test_bad(self):
         """Verify that the 'bad' action runs without error (but fails)."""
-        out = self.harness.run_action("bad")
-        self.assertIsNone(out.results)
-        self.assertEqual(out.logs, [])
-        self.assertFalse(out.success)
-        self.assertEqual(out.failure, "Sorry, I just couldn't manage it.")
+        with self.assertRaises(ops.testing.ActionFailed) as cm:
+            self.harness.run_action("bad")
+        self.assertIsNone(cm.exception.output.results)
+        self.assertEqual(cm.exception.output.logs, [])
+        self.assertEqual(cm.exception.message, "Sorry, I just couldn't manage it.")
 
     def test_combo_fail(self):
         """Verify that the 'combo' action fails when instructed to do so."""
-        out = self.harness.run_action("combo", {"should-fail": True})
-        self.assertIsNone(out.results)
-        self.assertEqual(out.logs, [])
-        self.assertFalse(out.success)
+        self.assertRaises(
+            ops.testing.ActionFailed, self.harness.run_action, "combo", **{"should-fail": True}
+        )
 
     def test_combo(self):
         """Verify that the 'combo' action runs without error."""
@@ -177,4 +169,3 @@ class TestCharm(unittest.TestCase):
             out = self.harness.run_action("combo")
         self.assertEqual(out.results, {"fortunes-told": 3})
         self.assertEqual(out.logs, my_fortunes)
-        self.assertTrue(out.success)

@@ -31,7 +31,6 @@ def test_simple(harness):
     out = harness.run_action("simple")
     assert out.results is None
     assert out.logs == []
-    assert out.success
 
 
 def test_input_default_value(harness, caplog):
@@ -39,7 +38,6 @@ def test_input_default_value(harness, caplog):
     out = harness.run_action("input")
     assert out.results is None
     assert out.logs == []
-    assert out.success
     assert len(caplog.records) == 1
     assert caplog.records[0].levelname == "INFO"
     default_value = harness.charm.meta.actions["input"].parameters["arg"]
@@ -52,7 +50,6 @@ def test_input(harness, caplog):
     out = harness.run_action("input", {"arg": response})
     assert out.results is None
     assert out.logs == []
-    assert out.success
     assert len(caplog.records) == 1
     assert caplog.records[0].levelname == "INFO"
     assert caplog.records[0].msg == f"The 'input' action says: {response}"
@@ -63,7 +60,6 @@ def test_multi_input_default_value(harness, caplog):
     out = harness.run_action("multi-input")
     assert out.results is None
     assert out.logs == []
-    assert out.success
     defaults = harness.charm.meta.actions["input"].parameters
     assert len(caplog.records) == defaults["int-arg"]["default"]
     for record in caplog.records:
@@ -77,7 +73,6 @@ def test_multi_input_str_arg(harness, caplog):
     out = harness.run_action("multi-input", params={"str-arg": response})
     assert out.results is None
     assert out.logs == []
-    assert out.success
     defaults = harness.charm.meta.actions["input"].parameters
     assert len(caplog.records) == defaults["int-arg"]["default"]
     for record in caplog.record:
@@ -91,7 +86,6 @@ def test_multi_input_int_arg(harness, caplog):
     out = harness.run_action("multi-input", params={"int-arg": count})
     assert out.results is None
     assert out.logs == []
-    assert out.success
     defaults = harness.charm.meta.actions["input"].parameters
     assert len(caplog.records) == count
     for record in caplog.records:
@@ -106,7 +100,6 @@ def test_multi_input_str_arg_and_int_arg(harness, caplog):
     out = harness.run_action("multi-input", params={"str-arg": response, "int-arg": count})
     assert out.results is None
     assert out.logs == []
-    assert out.success
     assert len(caplog.records) == count
     for record in caplog.records:
         assert record.levelname == "INFO"
@@ -115,7 +108,6 @@ def test_multi_input_str_arg_and_int_arg(harness, caplog):
 
 def test_multi_input_all_args(harness, monkeypatch, caplog):
     """Verify that the 'multi-input' action runs correctly (all args are provided)."""
-    monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
     response = "hello"
     count = 3
     extra_log = True
@@ -130,8 +122,9 @@ def test_multi_input_all_args(harness, monkeypatch, caplog):
         "array-arg": array,
         "num-arg": number,
     }
-    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
-    harness.charm.on.multi_input_action.emit()
+    out = harness.run_action("multi-input", params)
+    assert out.results is None
+    assert out.logs == []
     assert len(caplog.records) == count + 1
     for record in caplog.records[:-1]:
         assert record.levelname == "INFO"
@@ -149,7 +142,6 @@ def test_output(harness, monkeypatch):
     out = harness.run_action("output")
     assert out.results == {"fortune": my_fortune}
     assert out.logs == []
-    assert out.success
 
 
 def test_logger(harness, monkeypatch):
@@ -178,24 +170,19 @@ def test_logger(harness, monkeypatch):
         "I'm counting to 10: 9",
         "I'm counting to 10: 10",
     ]
-    assert out.success
 
 
 def test_bad(harness):
     """Verify that the 'bad' action runs without error (but fails)."""
-    out = harness.run_action("bad")
-    assert out.results is None
-    assert out.logs == []
-    assert not out.success
-    assert out.failure_message == "Sorry, I just couldn't manage it."
+    exc = pytest.raises(ops.testing.ActionFailed, harness.run_action, "bad").value
+    assert exc.output.results is None
+    assert exc.logs == []
+    assert exc.message == "Sorry, I just couldn't manage it."
 
 
 def test_combo_fail(harness, monkeypatch):
     """Verify that the 'combo' action fails when instructed to do so."""
-    out = harness.run_action("combo", {"should-fail": True})
-    assert out.results is None
-    assert out.logs == []
-    assert not out.success
+    pytest.raises(harness.run_action, "combo", **{"should-fail": True})
 
 
 def test_combo(harness, monkeypatch):
@@ -207,4 +194,3 @@ def test_combo(harness, monkeypatch):
     out = harness.run_action("combo")
     assert out.results == {"fortunes-told": 3}
     assert out.logs == expected_fortunes
-    assert out.success
