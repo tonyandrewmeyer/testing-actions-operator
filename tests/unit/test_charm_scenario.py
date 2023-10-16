@@ -24,9 +24,8 @@ def charm_meta():
 
 def test_simple():
     """Verify that the 'simple' action runs without error."""
-    action = scenario.Action("simple")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("simple", scenario.State())
     assert out.results is None
     assert out.logs == []
     assert out.failure == ""
@@ -178,9 +177,8 @@ def test_output(monkeypatch):
     """Verify that the 'output' action runs correctly."""
     my_fortune = "favours the brave"
     monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortune)
-    action = scenario.Action("output")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("output", scenario.State())
     assert out.results == {"fortune": my_fortune}
     assert out.logs == []
     assert out.failure == ""
@@ -190,10 +188,8 @@ def test_logger(monkeypatch):
     """Verify that the 'logger' action runs without error."""
     # Also make this a bit faster :)
     monkeypatch.setattr(time, "sleep", lambda _: None)
-
-    action = scenario.Action("logger")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("logger", scenario.State())
     assert out.results is None
     assert out.logs == [
         "I'm counting to 10: 1",
@@ -212,9 +208,8 @@ def test_logger(monkeypatch):
 
 def test_bad():
     """Verify that the 'bad' action runs without error (but fails)."""
-    action = scenario.Action("bad")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("bad", scenario.State())
     assert out.results is None
     assert out.logs == []
     assert out.failure
