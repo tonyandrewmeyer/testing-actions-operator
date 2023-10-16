@@ -135,6 +135,36 @@ class TestCharm(unittest.TestCase):
             cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"] * count
         )
 
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
+    def test_multi_input_all_args(self):
+        """Verify that the 'multi-input' action runs correctly (all args are provided)."""
+        response = "hello"
+        count = 3
+        extra_log = True
+        number = 28.8
+        obj = {"foo": "bar"}
+        array = ["jan", "apr", "jul", "oct"]
+        params = {
+            "str-arg": response,
+            "int-arg": count,
+            "bool-arg": extra_log,
+            "obj-arg": obj,
+            "array-arg": array,
+            "num-arg": number,
+        }
+        with unittest.mock.patch.object(
+            self.harness.charm.framework.model._backend,
+            "action_get",
+            unittest.mock.MagicMock(return_value=params),
+        ):
+            with self.assertLogs(level="INFO") as cm:
+                self.harness.charm.on.multi_input_action.emit()
+        expected_output = [f"INFO:charm:The 'multi-input' action says: {response}"] * count
+        expected_output.append(
+            f"INFO:charm:The 'multi-input' action also says: {number}, {array}, and {obj}"
+        )
+        self.assertEqual(cm.output, expected_output)
+
     @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "output"})
     def test_output(self):
         """Verify that the 'output' action runs correctly."""

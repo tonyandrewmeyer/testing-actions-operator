@@ -75,6 +75,7 @@ def test_input(caplog):
     assert count == 1
 
 
+@pytest.mark.skip(reason="scenario does not support integer params")
 def test_multi_input_default_value(caplog, charm_meta):
     """Verify that the 'multi-input' action runs correctly (no arg is provided)."""
     default_value = {
@@ -98,6 +99,8 @@ def test_multi_input_default_value(caplog, charm_meta):
     assert count == 1
 
 
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
 def test_multi_input_str_arg(caplog, charm_meta):
     """Verify that the 'multi-input' action runs correctly (str-arg is provided)."""
     default_value = {
@@ -123,6 +126,8 @@ def test_multi_input_str_arg(caplog, charm_meta):
     assert count == 1
 
 
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
 def test_multi_input_int_arg(caplog, charm_meta):
     """Verify that the 'multi-input' action runs correctly (int_arg is provided)."""
     default_value = {
@@ -148,6 +153,8 @@ def test_multi_input_int_arg(caplog, charm_meta):
     assert count == expected_count
 
 
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
 def test_multi_input_str_arg_and_int_arg(caplog):
     """Verify that the 'multi-input' action runs correctly (str-arg and int_arg are provided)."""
     response = "hello"
@@ -171,6 +178,45 @@ def test_multi_input_str_arg_and_int_arg(caplog):
         assert record.levelname == "INFO"
         assert record.msg == f"The 'multi-input' action says: {params['str-arg']}"
     assert count == expected_count
+
+
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
+def test_multi_input_all_args(caplog):
+    """Verify that the 'multi-input' action runs correctly (all args are provided)."""
+    response = "hello"
+    expected_count = 3
+    extra_log = True
+    number = 28.8
+    obj = {"foo": "bar"}
+    array = ["jan", "apr", "jul", "oct"]
+    params = {
+        "str-arg": response,
+        "int-arg": expected_count,
+        "bool-arg": extra_log,
+        "obj-arg": obj,
+        "array-arg": array,
+        "num-arg": number,
+    }
+    action = scenario.Action("multi-input", params=params)
+    ctx = scenario.Context(ActionsTestingCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results is None
+    assert out.logs == []
+    assert out.failure == ""
+    count = 0
+    for record in caplog.records[:-1]:
+        if record.levelname == "DEBUG":
+            # Ignore scenario's messages.
+            continue
+        count += 1
+        assert record.levelname == "INFO"
+        assert record.msg == f"The 'multi-input' action says: {params['str-arg']}"
+    assert count == expected_count + 1
+    assert caplog.records[-1].levelname == "INFO"
+    assert caplog.records[-1].msg == (
+        f"The 'multi-input' action also says: {number}, {array}, and {obj}"
+    )
 
 
 def test_output(monkeypatch):

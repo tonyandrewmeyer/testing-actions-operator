@@ -126,6 +126,35 @@ def test_multi_input_str_arg_and_int_arg(harness, monkeypatch, caplog):
         assert record.msg == f"The 'multi-input' action says: {response}"
 
 
+def test_multi_input_all_args(harness, monkeypatch, caplog):
+    """Verify that the 'multi-input' action runs correctly (all args are provided)."""
+    monkeypatch.setenv("JUJU_ACTION_NAME", "multi-input")
+    response = "hello"
+    count = 3
+    extra_log = True
+    number = 28.8
+    obj = {"foo": "bar"}
+    array = ["jan", "apr", "jul", "oct"]
+    params = {
+        "str-arg": response,
+        "int-arg": count,
+        "bool-arg": extra_log,
+        "obj-arg": obj,
+        "array-arg": array,
+        "num-arg": number,
+    }
+    monkeypatch.setattr(harness.charm.framework.model._backend, "action_get", lambda: params)
+    harness.charm.on.multi_input_action.emit()
+    assert len(caplog.records) == count + 1
+    for record in caplog.records[:-1]:
+        assert record.levelname == "INFO"
+        assert record.msg == f"The 'multi-input' action says: {response}"
+    assert caplog.records[-1].levelname == "INFO"
+    assert caplog.records[-1].msg == (
+        f"The 'multi-input' action also says: {number}, {array}, and {obj}"
+    )
+
+
 def test_output(harness, monkeypatch):
     """Verify that the 'output' action runs correctly."""
     monkeypatch.setenv("JUJU_ACTION_NAME", "output")
