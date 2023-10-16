@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# /usr/bin/env python3
 # Copyright 2023 Tony Meyer
 # See LICENSE file for licensing details.
 #
@@ -46,6 +46,12 @@ class ActionsTestingCharm(ops.CharmBase):
 
     def _on_multi_input_action(self, event: ops.ActionEvent):
         """Log whatever input we were given, as many times as we are told."""
+        count = event.params["arg2"]
+        try:
+            assert int(count) == count  # nosec
+        except (AssertionError, ValueError):
+            event.fail("'arg2' must be an integer.")
+            return
         for _ in range(event.params["arg2"]):
             logger.info(f"The 'multi-input' action says: {event.params['arg1']}")
 
