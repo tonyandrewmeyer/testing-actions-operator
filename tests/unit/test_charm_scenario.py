@@ -24,9 +24,8 @@ def charm_meta():
 
 def test_simple():
     """Verify that the 'simple' action runs without error."""
-    action = scenario.Action("simple")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("simple", scenario.State())
     assert out.results is None
     assert out.logs == []
     assert out.failure == ""
@@ -76,6 +75,7 @@ def test_input(caplog):
     assert count == 1
 
 
+@pytest.mark.skip(reason="scenario does not support integer params")
 def test_multi_input_default_value(caplog, charm_meta):
     """Verify that the 'multi-input' action runs correctly (no arg is provided)."""
     default_value = {
@@ -95,18 +95,20 @@ def test_multi_input_default_value(caplog, charm_meta):
             continue
         count += 1
         assert record.levelname == "INFO"
-        assert record.msg == f"The 'multi-input' action says: {default_value['arg1']}"
+        assert record.msg == f"The 'multi-input' action says: {default_value['str-arg']}"
     assert count == 1
 
 
-def test_multi_input_arg1(caplog, charm_meta):
-    """Verify that the 'multi-input' action runs correctly (arg1 is provided)."""
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
+def test_multi_input_str_arg(caplog, charm_meta):
+    """Verify that the 'multi-input' action runs correctly (str-arg is provided)."""
     default_value = {
         key: details["default"]
         for key, details in charm_meta.actions["multi-input"].parameters.items()
     }
     response = "hello"
-    default_value["arg1"] = response
+    default_value["str-arg"] = response
     action = scenario.Action("multi-input", params=default_value)
     ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
@@ -120,18 +122,20 @@ def test_multi_input_arg1(caplog, charm_meta):
             continue
         count += 1
         assert record.levelname == "INFO"
-        assert record.msg == f"The 'multi-input' action says: {default_value['arg1']}"
+        assert record.msg == f"The 'multi-input' action says: {default_value['str-arg']}"
     assert count == 1
 
 
-def test_multi_input_arg2(caplog, charm_meta):
-    """Verify that the 'multi-input' action runs correctly (arg2 is provided)."""
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
+def test_multi_input_int_arg(caplog, charm_meta):
+    """Verify that the 'multi-input' action runs correctly (int_arg is provided)."""
     default_value = {
         key: details["default"]
         for key, details in charm_meta.actions["multi-input"].parameters.items()
     }
     expected_count = 2
-    default_value["arg2"] = expected_count
+    default_value["int-arg"] = expected_count
     action = scenario.Action("multi-input", params=default_value)
     ctx = scenario.Context(ActionsTestingCharm)
     out = ctx.run_action(action, scenario.State())
@@ -145,17 +149,19 @@ def test_multi_input_arg2(caplog, charm_meta):
             continue
         count += 1
         assert record.levelname == "INFO"
-        assert record.msg == f"The 'multi-input' action says: {default_value['arg1']}"
+        assert record.msg == f"The 'multi-input' action says: {default_value['str-arg']}"
     assert count == expected_count
 
 
-def test_multi_input_arg1_and_arg2(caplog):
-    """Verify that the 'multi-input' action runs correctly (arg1 and arg2 are provided)."""
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
+def test_multi_input_str_arg_and_int_arg(caplog):
+    """Verify that the 'multi-input' action runs correctly (str-arg and int_arg are provided)."""
     response = "hello"
     expected_count = 3
     params = {
-        "arg1": response,
-        "arg2": expected_count,
+        "str-arg": response,
+        "int-arg": expected_count,
     }
     action = scenario.Action("multi-input", params=params)
     ctx = scenario.Context(ActionsTestingCharm)
@@ -170,17 +176,55 @@ def test_multi_input_arg1_and_arg2(caplog):
             continue
         count += 1
         assert record.levelname == "INFO"
-        assert record.msg == f"The 'multi-input' action says: {params['arg1']}"
+        assert record.msg == f"The 'multi-input' action says: {params['str-arg']}"
     assert count == expected_count
+
+
+# See https://github.com/canonical/ops-scenario/issues/66
+@pytest.mark.skip(reason="scenario does not support integer params")
+def test_multi_input_all_args(caplog):
+    """Verify that the 'multi-input' action runs correctly (all args are provided)."""
+    response = "hello"
+    expected_count = 3
+    extra_log = True
+    number = 28.8
+    obj = {"foo": "bar"}
+    array = ["jan", "apr", "jul", "oct"]
+    params = {
+        "str-arg": response,
+        "int-arg": expected_count,
+        "bool-arg": extra_log,
+        "obj-arg": obj,
+        "array-arg": array,
+        "num-arg": number,
+    }
+    action = scenario.Action("multi-input", params=params)
+    ctx = scenario.Context(ActionsTestingCharm)
+    out = ctx.run_action(action, scenario.State())
+    assert out.results is None
+    assert out.logs == []
+    assert out.failure == ""
+    count = 0
+    for record in caplog.records[:-1]:
+        if record.levelname == "DEBUG":
+            # Ignore scenario's messages.
+            continue
+        count += 1
+        assert record.levelname == "INFO"
+        assert record.msg == f"The 'multi-input' action says: {params['str-arg']}"
+    assert count == expected_count + 1
+    assert caplog.records[-1].levelname == "INFO"
+    assert caplog.records[-1].msg == (
+        f"The 'multi-input' action also says: {number}, {array}, and {obj}"
+    )
 
 
 def test_output(monkeypatch):
     """Verify that the 'output' action runs correctly."""
     my_fortune = "favours the brave"
     monkeypatch.setattr(fortune, "get_random_fortune", lambda _: my_fortune)
-    action = scenario.Action("output")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("output", scenario.State())
     assert out.results == {"fortune": my_fortune}
     assert out.logs == []
     assert out.failure == ""
@@ -190,10 +234,8 @@ def test_logger(monkeypatch):
     """Verify that the 'logger' action runs without error."""
     # Also make this a bit faster :)
     monkeypatch.setattr(time, "sleep", lambda _: None)
-
-    action = scenario.Action("logger")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("logger", scenario.State())
     assert out.results is None
     assert out.logs == [
         "I'm counting to 10: 1",
@@ -212,9 +254,8 @@ def test_logger(monkeypatch):
 
 def test_bad():
     """Verify that the 'bad' action runs without error (but fails)."""
-    action = scenario.Action("bad")
     ctx = scenario.Context(ActionsTestingCharm)
-    out = ctx.run_action(action, scenario.State())
+    out = ctx.run_action("bad", scenario.State())
     assert out.results is None
     assert out.logs == []
     assert out.failure

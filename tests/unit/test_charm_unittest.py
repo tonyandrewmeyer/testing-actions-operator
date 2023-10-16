@@ -57,39 +57,39 @@ class TestCharm(unittest.TestCase):
         self.assertTrue(out.success)
         defaults = self.harness.charm.meta.actions["input"].parameters
         self.assertEqual(
-            cm.output, [f"INFO:charm:The 'multi-input' action says: {defaults['arg1']['default']}"]
+            cm.output, [f"INFO:charm:The 'multi-input' action says: {defaults['str-arg']['default']}"]
         )
 
-    def test_multi_input_arg1(self):
-        """Verify that the 'multi-input' action runs correctly (arg1 is provided)."""
+    def test_multi_input_str_arg(self):
+        """Verify that the 'multi-input' action runs correctly (str_arg is provided)."""
         response = "hello"
         with self.assertLogs(level="INFO") as cm:
-            out = self.harness.run_action("multi-input", params={"arg1": response})
+            out = self.harness.run_action("multi-input", params={"str-arg": response})
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
         self.assertTrue(out.success)
         self.assertEqual(cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"])
 
-    def test_multi_input_arg2(self):
-        """Verify that the 'multi-input' action runs correctly (arg2 is provided)."""
+    def test_multi_input_int_arg(self):
+        """Verify that the 'multi-input' action runs correctly (int_arg is provided)."""
         count = 2
         with self.assertLogs(level="INFO") as cm:
-            out = self.harness.run_action("multi-input", params={"arg2": count})
+            out = self.harness.run_action("multi-input", params={"int_arg": count})
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
         self.assertTrue(out.success)
         defaults = self.harness.charm.meta.actions["input"].parameters
         self.assertEqual(
             cm.output,
-            [f"INFO:charm:The 'multi-input' action says: {defaults['arg1']['default']}"] * count,
+            [f"INFO:charm:The 'multi-input' action says: {defaults['str-arg']['default']}"] * count,
         )
 
-    def test_multi_input_arg1_and_arg2(self):
-        """Verify that the 'multi-input' action runs correctly (arg1 and arg2 are provided)."""
+    def test_multi_input_str_arg_and_int_arg(self):
+        """Verify that the 'multi-input' action runs correctly (str_arg and int_arg are provided)."""
         response = "hello"
         count = 3
         with self.assertLogs(level="INFO") as cm:
-            out = self.harness.run_action("multi-input", params={"arg1": response, "arg2": count})
+            out = self.harness.run_action("multi-input", params={"str-arg": response, "int-arg": count})
         self.assertIsNone(out.results)
         self.assertEqual(out.logs, [])
         self.assertTrue(out.success)
@@ -97,6 +97,32 @@ class TestCharm(unittest.TestCase):
             cm.output, [f"INFO:charm:The 'multi-input' action says: {response}"] * count
         )
 
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "multi-input"})
+    def test_multi_input_all_args(self):
+        """Verify that the 'multi-input' action runs correctly (all args are provided)."""
+        response = "hello"
+        count = 3
+        extra_log = True
+        number = 28.8
+        obj = {"foo": "bar"}
+        array = ["jan", "apr", "jul", "oct"]
+        params = {
+            "str-arg": response,
+            "int-arg": count,
+            "bool-arg": extra_log,
+            "obj-arg": obj,
+            "array-arg": array,
+            "num-arg": number,
+        }
+        with self.assertLogs(level="INFO") as cm:
+            self.harness.run_action("multi-input", params)
+        expected_output = [f"INFO:charm:The 'multi-input' action says: {response}"] * count
+        expected_output.append(
+            f"INFO:charm:The 'multi-input' action also says: {number}, {array}, and {obj}"
+        )
+        self.assertEqual(cm.output, expected_output)
+
+    @unittest.mock.patch.dict(os.environ, {"JUJU_ACTION_NAME": "output"})
     def test_output(self):
         """Verify that the 'output' action runs correctly."""
         my_fortune = "favours the brave"
