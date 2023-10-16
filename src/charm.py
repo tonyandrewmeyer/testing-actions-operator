@@ -1,4 +1,4 @@
-# /usr/bin/env python3
+#! /usr/bin/env python3
 # Copyright 2023 Tony Meyer
 # See LICENSE file for licensing details.
 #
